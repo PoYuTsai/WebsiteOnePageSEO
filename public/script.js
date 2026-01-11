@@ -151,8 +151,34 @@ function displayResults(data) {
         .map(suggestion => `<li>${suggestion}</li>`)
         .join('');
 
+    // Handle both old format (string array) and new format (object array)
     blogIdeasList.innerHTML = aiSuggestions.blogIdeas
-        .map(idea => `<li>${idea}</li>`)
+        .map(idea => {
+            if (typeof idea === 'string') {
+                return `<li>${idea}</li>`;
+            }
+            // Detailed blog idea format
+            return `
+                <li class="blog-idea-card">
+                    <h4 class="blog-idea-title">${idea.title || 'Untitled'}</h4>
+                    <p class="blog-idea-desc">${idea.description || ''}</p>
+                    ${idea.keywords?.length ? `
+                        <div class="blog-idea-keywords">
+                            <span class="keyword-label">Keywords:</span>
+                            ${idea.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    ${idea.outline?.length ? `
+                        <div class="blog-idea-outline">
+                            <span class="outline-label">Outline:</span>
+                            <ol class="outline-list">
+                                ${idea.outline.map(point => `<li>${point}</li>`).join('')}
+                            </ol>
+                        </div>
+                    ` : ''}
+                </li>
+            `;
+        })
         .join('');
 
     results.style.display = 'block';
@@ -299,9 +325,31 @@ function exportToPDF() {
             <!-- Blog Ideas -->
             ${aiSuggestions?.blogIdeas?.length ? `
             <h2 style="color: #007BFF; border-bottom: 2px solid #007BFF; padding-bottom: 8px; margin-bottom: 15px;">Blog Post Ideas</h2>
-            <ol style="padding-left: 20px; margin-bottom: 25px;">
-                ${aiSuggestions.blogIdeas.map(idea => `<li style="margin-bottom: 10px; line-height: 1.6;">${idea}</li>`).join('')}
-            </ol>
+            ${aiSuggestions.blogIdeas.map((idea, index) => {
+                if (typeof idea === 'string') {
+                    return `<div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #007BFF;"><strong>${index + 1}.</strong> ${idea}</div>`;
+                }
+                return `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007BFF;">
+                        <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">${index + 1}. ${idea.title || 'Untitled'}</h3>
+                        <p style="margin: 0 0 12px 0; color: #666; line-height: 1.6;">${idea.description || ''}</p>
+                        ${idea.keywords?.length ? `
+                            <div style="margin-bottom: 12px;">
+                                <strong style="font-size: 12px; color: #888; text-transform: uppercase;">Keywords: </strong>
+                                ${idea.keywords.map(k => `<span style="display: inline-block; padding: 3px 10px; margin: 3px 5px 3px 0; background: rgba(0,123,255,0.1); color: #007BFF; border-radius: 15px; font-size: 13px;">${k}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${idea.outline?.length ? `
+                            <div>
+                                <strong style="font-size: 12px; color: #888; text-transform: uppercase;">Content Outline:</strong>
+                                <ol style="margin: 8px 0 0 0; padding-left: 20px;">
+                                    ${idea.outline.map(point => `<li style="margin-bottom: 5px; color: #555; line-height: 1.5;">${point}</li>`).join('')}
+                                </ol>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('')}
             ` : ''}
 
             <!-- Footer -->

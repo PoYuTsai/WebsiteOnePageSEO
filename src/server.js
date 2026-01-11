@@ -169,7 +169,20 @@ Provide your response in the following JSON format only (no markdown, no code bl
     "score": <number 0-100>,
     "explanation": "<brief 1-2 sentence explanation of the score>",
     "suggestions": ["<suggestion 1>", "<suggestion 2>", "<suggestion 3>", "<suggestion 4>", "<suggestion 5>"],
-    "blogIdeas": ["<blog idea 1>", "<blog idea 2>"]
+    "blogIdeas": [
+        {
+            "title": "<catchy blog post title>",
+            "description": "<2-3 sentence summary of the blog post>",
+            "keywords": ["<keyword1>", "<keyword2>", "<keyword3>"],
+            "outline": ["<main point 1>", "<main point 2>", "<main point 3>", "<main point 4>"]
+        },
+        {
+            "title": "<catchy blog post title>",
+            "description": "<2-3 sentence summary of the blog post>",
+            "keywords": ["<keyword1>", "<keyword2>", "<keyword3>"],
+            "outline": ["<main point 1>", "<main point 2>", "<main point 3>", "<main point 4>"]
+        }
+    ]
 }
 
 Base your score and suggestions on SEO best practices:
@@ -178,7 +191,9 @@ Base your score and suggestions on SEO best practices:
 - Page should have exactly 1 H1 tag
 - All images should have alt text
 - Good content length is 1000+ words
-- Balance of internal and external links`;
+- Balance of internal and external links
+
+For blog ideas, create detailed, actionable content suggestions based on the website's topic and SEO gaps. Each blog idea should help improve the site's SEO and provide value to readers. Use the same language as the website content for the blog ideas.`;
 
     try {
         const result = await model.generateContent(prompt);

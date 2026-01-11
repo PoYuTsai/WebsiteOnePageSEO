@@ -343,6 +343,75 @@ header h1 {
     background-color: rgba(0, 123, 255, 0.1);
 }
 
+/* Detailed Blog Ideas */
+.blog-idea-card {
+    padding: 1.25rem !important;
+    border-left: 4px solid var(--accent-blue) !important;
+}
+
+.blog-idea-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+}
+
+.blog-idea-desc {
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+}
+
+.blog-idea-keywords {
+    margin-bottom: 1rem;
+}
+
+.keyword-label,
+.outline-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.keyword-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    margin: 0.25rem 0.5rem 0.25rem 0;
+    background-color: rgba(0, 123, 255, 0.15);
+    color: var(--accent-blue);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.blog-idea-outline {
+    margin-top: 0.75rem;
+}
+
+.outline-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    list-style: decimal;
+}
+
+.outline-list li {
+    padding: 0.4rem 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border-left: none !important;
+    border-radius: 0 !important;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.outline-list li:hover {
+    background: transparent !important;
+}
+
 /* History Button */
 #historyBtn {
     padding: 1rem;
