@@ -212,251 +212,250 @@ function exportToPDF() {
     const doc = new jsPDF();
     const { analytics, aiSuggestions } = lastAnalysisData;
 
-    // Colors
-    const primaryBlue = [0, 123, 255];
-    const darkGray = [45, 45, 45];
-    const lightGray = [176, 176, 176];
-    const white = [255, 255, 255];
-
-    let yPos = 20;
-    const leftMargin = 20;
+    // Configuration
+    const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
-    const contentWidth = pageWidth - 40;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const contentWidth = pageWidth - (margin * 2);
+    const lineHeight = 7;
+    let y = margin;
 
-    // Helper function to add new page if needed
-    function checkNewPage(requiredSpace) {
-        if (yPos + requiredSpace > 280) {
+    // Helper: Check and add new page if needed
+    function checkPage(needed = 20) {
+        if (y + needed > pageHeight - 30) {
             doc.addPage();
-            yPos = 20;
+            y = margin;
             return true;
         }
         return false;
     }
 
-    // Header / Branding
-    doc.setFillColor(...primaryBlue);
-    doc.rect(0, 0, pageWidth, 40, 'F');
+    // Helper: Sanitize text (remove problematic characters for PDF)
+    function sanitize(text) {
+        if (!text) return 'N/A';
+        // Replace non-ASCII with placeholder or remove
+        return String(text).replace(/[^\x00-\x7F]/g, '?');
+    }
 
-    doc.setTextColor(...white);
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.text('On-Page SEO Analyzer', leftMargin, 25);
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Powered by Google Gemini AI', leftMargin, 34);
-
-    yPos = 55;
-
-    // URL and Date
-    doc.setTextColor(...darkGray);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Website Analyzed:', leftMargin, yPos);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...primaryBlue);
-
-    // Truncate URL if too long
-    const maxUrlLength = 70;
-    const displayUrl = lastAnalyzedUrl.length > maxUrlLength
-        ? lastAnalyzedUrl.substring(0, maxUrlLength) + '...'
-        : lastAnalyzedUrl;
-    doc.text(displayUrl, leftMargin + 42, yPos);
-
-    yPos += 8;
-    doc.setTextColor(...darkGray);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Analysis Date:', leftMargin, yPos);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...lightGray);
-    doc.text(new Date().toLocaleString(), leftMargin + 35, yPos);
-
-    yPos += 15;
-
-    // Section: SEO Score
-    if (aiSuggestions.score !== null) {
-        doc.setFillColor(...primaryBlue);
-        doc.rect(leftMargin, yPos, contentWidth, 30, 'F');
-
-        doc.setTextColor(...white);
+    // Helper: Add section title
+    function addSection(title) {
+        checkPage(25);
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('SEO Score', leftMargin + 10, yPos + 12);
-
-        doc.setFontSize(28);
-        doc.text(`${aiSuggestions.score}/100`, leftMargin + 10, yPos + 26);
-
-        // Score explanation on the right
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const explanationLines = doc.splitTextToSize(aiSuggestions.explanation || '', contentWidth - 80);
-        doc.text(explanationLines, leftMargin + 80, yPos + 15);
-
-        yPos += 40;
+        doc.setTextColor(0, 123, 255);
+        doc.text(title, margin, y);
+        y += 3;
+        doc.setDrawColor(0, 123, 255);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, margin + 50, y);
+        y += lineHeight + 3;
     }
 
-    // Section: Structured Analytics
-    doc.setTextColor(...darkGray);
-    doc.setFontSize(14);
+    // Helper: Add key-value row
+    function addRow(label, value) {
+        checkPage(10);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(80, 80, 80);
+        doc.text(label + ':', margin, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(40, 40, 40);
+        doc.text(sanitize(String(value)), margin + 60, y);
+        y += lineHeight;
+    }
+
+    // Helper: Add wrapped text
+    function addWrappedText(text, indent = 0) {
+        const maxWidth = contentWidth - indent;
+        const lines = doc.splitTextToSize(sanitize(text), maxWidth);
+        lines.forEach(line => {
+            checkPage(10);
+            doc.text(line, margin + indent, y);
+            y += lineHeight - 1;
+        });
+    }
+
+    // ============ HEADER ============
+    doc.setFillColor(0, 123, 255);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('Structured Analytics', leftMargin, yPos);
-    yPos += 8;
-
-    // Draw line under section title
-    doc.setDrawColor(...primaryBlue);
-    doc.setLineWidth(0.5);
-    doc.line(leftMargin, yPos, leftMargin + 60, yPos);
-    yPos += 10;
-
-    // Analytics metrics in a grid-like format
-    const metrics = [
-        { label: 'Word Count', value: analytics.wordCount.toLocaleString() },
-        { label: 'Title Length', value: `${analytics.titleLength} chars` },
-        { label: 'Meta Description Length', value: `${analytics.metaDescriptionLength} chars` },
-        { label: 'H1 Tags', value: analytics.h1Count.toString() },
-        { label: 'H2 Tags', value: analytics.h2Count.toString() },
-        { label: 'H3 Tags', value: analytics.h3Count.toString() },
-        { label: 'Total Images', value: analytics.imageCount.toString() },
-        { label: 'Images Missing Alt', value: analytics.imagesWithoutAlt.toString() },
-        { label: 'Internal Links', value: analytics.internalLinks.toString() },
-        { label: 'External Links', value: analytics.externalLinks.toString() }
-    ];
+    doc.text('SEO Analysis Report', margin, 22);
 
     doc.setFontSize(10);
-    const colWidth = contentWidth / 2;
+    doc.setFont('helvetica', 'normal');
+    doc.text('Generated by On-Page SEO Analyzer', margin, 30);
 
-    for (let i = 0; i < metrics.length; i += 2) {
-        checkNewPage(12);
+    y = 50;
 
-        // Left column
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...lightGray);
-        doc.text(metrics[i].label + ':', leftMargin, yPos);
+    // ============ REPORT INFO ============
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text('URL:', margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 123, 255);
+
+    // Truncate long URLs
+    const displayUrl = lastAnalyzedUrl.length > 60
+        ? lastAnalyzedUrl.substring(0, 60) + '...'
+        : lastAnalyzedUrl;
+    doc.text(displayUrl, margin + 15, y);
+    y += lineHeight;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Date:', margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text(new Date().toLocaleString('en-US'), margin + 15, y);
+    y += lineHeight + 5;
+
+    // ============ SEO SCORE ============
+    if (aiSuggestions && aiSuggestions.score !== null) {
+        checkPage(30);
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(margin, y, contentWidth, 25, 3, 3, 'F');
+
+        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...darkGray);
-        doc.text(metrics[i].value, leftMargin + 55, yPos);
+        doc.setTextColor(40, 40, 40);
+        doc.text('SEO Score:', margin + 5, y + 10);
 
-        // Right column (if exists)
-        if (metrics[i + 1]) {
+        const score = aiSuggestions.score;
+        if (score >= 80) doc.setTextColor(40, 167, 69);
+        else if (score >= 60) doc.setTextColor(255, 193, 7);
+        else doc.setTextColor(220, 53, 69);
+
+        doc.setFontSize(24);
+        doc.text(score + '/100', margin + 45, y + 12);
+
+        if (aiSuggestions.explanation) {
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(...lightGray);
-            doc.text(metrics[i + 1].label + ':', leftMargin + colWidth, yPos);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...darkGray);
-            doc.text(metrics[i + 1].value, leftMargin + colWidth + 55, yPos);
+            const expLines = doc.splitTextToSize(sanitize(aiSuggestions.explanation), contentWidth - 100);
+            doc.text(expLines, margin + 90, y + 8);
         }
 
-        yPos += 8;
+        y += 35;
     }
 
-    // Title content
-    yPos += 5;
-    checkNewPage(20);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...lightGray);
-    doc.text('Page Title:', leftMargin, yPos);
-    doc.setTextColor(...darkGray);
-    const titleLines = doc.splitTextToSize(analytics.title || 'Not found', contentWidth - 25);
-    doc.text(titleLines, leftMargin + 25, yPos);
-    yPos += titleLines.length * 5 + 5;
+    // ============ ANALYTICS ============
+    addSection('Page Analytics');
 
-    // Meta description content
-    checkNewPage(20);
-    doc.setTextColor(...lightGray);
-    doc.text('Meta Description:', leftMargin, yPos);
-    yPos += 5;
-    doc.setTextColor(...darkGray);
-    const metaLines = doc.splitTextToSize(analytics.metaDescription || 'Not found', contentWidth);
-    doc.text(metaLines, leftMargin, yPos);
-    yPos += metaLines.length * 5 + 10;
+    addRow('Word Count', analytics.wordCount.toLocaleString());
+    addRow('Title Length', analytics.titleLength + ' characters');
+    addRow('Meta Desc Length', analytics.metaDescriptionLength + ' characters');
+    addRow('H1 Tags', analytics.h1Count);
+    addRow('H2 Tags', analytics.h2Count);
+    addRow('H3 Tags', analytics.h3Count);
+    addRow('Images', analytics.imageCount);
+    addRow('Missing Alt Text', analytics.imagesWithoutAlt);
+    addRow('Internal Links', analytics.internalLinks);
+    addRow('External Links', analytics.externalLinks);
 
-    // Section: AI Suggestions
-    checkNewPage(30);
-    doc.setTextColor(...darkGray);
-    doc.setFontSize(14);
+    y += 5;
+
+    // Page Title
+    checkPage(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('AI-Powered Suggestions', leftMargin, yPos);
-    yPos += 8;
-
-    doc.setDrawColor(...primaryBlue);
-    doc.line(leftMargin, yPos, leftMargin + 70, yPos);
-    yPos += 10;
-
-    // Improvement checklist
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...darkGray);
-    doc.text('Improvement Checklist:', leftMargin, yPos);
-    yPos += 8;
-
-    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text('Page Title:', margin, y);
+    y += lineHeight;
     doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    addWrappedText(analytics.title || 'Not found');
+    y += 5;
 
-    if (aiSuggestions.suggestions && aiSuggestions.suggestions.length > 0) {
-        aiSuggestions.suggestions.forEach((suggestion, index) => {
-            checkNewPage(15);
-            doc.setTextColor(...primaryBlue);
-            doc.text(`${index + 1}.`, leftMargin, yPos);
-            doc.setTextColor(...darkGray);
-            const suggestionLines = doc.splitTextToSize(suggestion, contentWidth - 10);
-            doc.text(suggestionLines, leftMargin + 8, yPos);
-            yPos += suggestionLines.length * 5 + 4;
+    // Meta Description
+    checkPage(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Meta Description:', margin, y);
+    y += lineHeight;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    addWrappedText(analytics.metaDescription || 'Not found');
+    y += 10;
+
+    // ============ SUGGESTIONS ============
+    if (aiSuggestions && aiSuggestions.suggestions && aiSuggestions.suggestions.length > 0) {
+        addSection('Improvement Suggestions');
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(40, 40, 40);
+
+        aiSuggestions.suggestions.forEach((suggestion, i) => {
+            checkPage(15);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 123, 255);
+            doc.text((i + 1) + '.', margin, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(40, 40, 40);
+
+            const lines = doc.splitTextToSize(sanitize(suggestion), contentWidth - 15);
+            lines.forEach((line, lineIdx) => {
+                if (lineIdx > 0) checkPage(8);
+                doc.text(line, margin + 10, y);
+                y += lineHeight - 1;
+            });
+            y += 3;
         });
     }
 
-    yPos += 5;
+    // ============ BLOG IDEAS ============
+    if (aiSuggestions && aiSuggestions.blogIdeas && aiSuggestions.blogIdeas.length > 0) {
+        y += 5;
+        addSection('Blog Post Ideas');
 
-    // Blog Ideas
-    checkNewPage(30);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...darkGray);
-    doc.text('Blog Post Ideas:', leftMargin, yPos);
-    yPos += 8;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(40, 40, 40);
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
+        aiSuggestions.blogIdeas.forEach((idea, i) => {
+            checkPage(15);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 123, 255);
+            doc.text((i + 1) + '.', margin, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(40, 40, 40);
 
-    if (aiSuggestions.blogIdeas && aiSuggestions.blogIdeas.length > 0) {
-        aiSuggestions.blogIdeas.forEach((idea, index) => {
-            checkNewPage(15);
-            doc.setTextColor(...primaryBlue);
-            doc.text(`${index + 1}.`, leftMargin, yPos);
-            doc.setTextColor(...darkGray);
-            const ideaLines = doc.splitTextToSize(idea, contentWidth - 10);
-            doc.text(ideaLines, leftMargin + 8, yPos);
-            yPos += ideaLines.length * 5 + 4;
+            const lines = doc.splitTextToSize(sanitize(idea), contentWidth - 15);
+            lines.forEach((line, lineIdx) => {
+                if (lineIdx > 0) checkPage(8);
+                doc.text(line, margin + 10, y);
+                y += lineHeight - 1;
+            });
+            y += 3;
         });
-    } else {
-        doc.setTextColor(...lightGray);
-        doc.text('No blog ideas available.', leftMargin, yPos);
     }
 
-    // Footer
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
+    // ============ FOOTER ============
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         doc.setFontSize(8);
-        doc.setTextColor(...lightGray);
+        doc.setTextColor(150, 150, 150);
         doc.text(
-            `Generated by On-Page SEO Analyzer | Page ${i} of ${pageCount}`,
+            'Page ' + i + ' of ' + totalPages + ' | On-Page SEO Analyzer',
             pageWidth / 2,
-            290,
+            pageHeight - 10,
             { align: 'center' }
         );
     }
 
-    // Generate filename from URL
-    let filename = 'seo-analysis';
+    // Save PDF
+    let filename = 'seo-report';
     try {
-        const urlObj = new URL(lastAnalyzedUrl);
-        filename = `seo-analysis-${urlObj.hostname.replace(/\./g, '-')}`;
-    } catch (e) {
-        // Use default filename
-    }
+        const host = new URL(lastAnalyzedUrl).hostname.replace(/\./g, '-');
+        filename = 'seo-report-' + host;
+    } catch (e) {}
 
-    // Save the PDF
-    doc.save(`${filename}.pdf`);
+    doc.save(filename + '.pdf');
 }
 
 // ==================== HISTORY FUNCTIONS ====================
