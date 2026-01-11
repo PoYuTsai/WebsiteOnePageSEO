@@ -1,0 +1,25 @@
+{
+  "name": "onesite-page-seo",
+  "version": "1.0.0",
+  "description": "On-Page SEO Analyzer powered by Google Gemini 1.5 Pro",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "seo",
+    "analyzer",
+    "gemini",
+    "web-scraping"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

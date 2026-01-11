@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Page SEO Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>On-Page SEO Analyzer</h1>
+            <p class="subtitle">Powered by Google Gemini AI</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="input-wrapper">
+                    <input
+                        type="url"
+                        id="urlInput"
+                        placeholder="Enter website URL (e.g., https://example.com)"
+                        autocomplete="off"
+                    >
+                    <button id="analyzeBtn" onclick="analyzeURL()">
+                        <span class="btn-text">Analyze</span>
+                        <span class="btn-loader" style="display: none;"></span>
+                    </button>
+                </div>
+                <p id="errorMessage" class="error-message"></p>
+            </section>
+
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing website...</p>
+            </div>
+
+            <div id="results" class="results" style="display: none;">
+                <section class="analytics-section">
+                    <h2>Structured Analytics</h2>
+                    <div class="analytics-grid" id="analyticsGrid"></div>
+                </section>
+
+                <section class="ai-section">
+                    <h2>AI-Powered Suggestions</h2>
+                    <div class="ai-card">
+                        <div class="score-container">
+                            <div class="score-circle" id="scoreCircle">
+                                <span class="score-value" id="scoreValue">--</span>
+                                <span class="score-label">/ 100</span>
+                            </div>
+                            <p class="score-explanation" id="scoreExplanation"></p>
+                        </div>
+
+                        <div class="suggestions-container">
+                            <h3>Improvement Checklist</h3>
+                            <ul class="suggestions-list" id="suggestionsList"></ul>
+                        </div>
+
+                        <div class="blog-ideas-container">
+                            <h3>Blog Post Ideas</h3>
+                            <ul class="blog-ideas-list" id="blogIdeasList"></ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>Built with Node.js, Express, and Google Gemini AI</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
