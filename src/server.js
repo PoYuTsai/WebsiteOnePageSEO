@@ -148,7 +148,7 @@ async function getAISuggestions(analytics, url) {
         };
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `You are an SEO expert. Analyze the following on-page SEO metrics for the URL: ${url}
 
