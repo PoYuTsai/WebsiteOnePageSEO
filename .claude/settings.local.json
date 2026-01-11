@@ -3,7 +3,11 @@
     "allow": [
       "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" add .)",
       "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" commit -m \"Add detailed Blog Post Ideas with outline\n\n- Update AI prompt to generate detailed blog ideas with:\n  - Title\n  - Description \\(2-3 sentences\\)\n  - Target keywords\n  - Content outline \\(4 main points\\)\n- Add styled cards for detailed blog ideas display\n- Update PDF export to include detailed blog format\n- Use same language as website content\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\")",
-      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" push origin main)"
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" push origin main)",
+      "Bash(npm test:*)",
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" status)",
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" log --oneline -5)",
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" commit -m \"Add Vercel deployment configuration\n\n- Add vercel.json for routing and builds\n- Export Express app for serverless functions\n- Keep local development working\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\")"
     ]
   }
 }
